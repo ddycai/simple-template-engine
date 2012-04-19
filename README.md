@@ -3,6 +3,13 @@ plink
 
 Super lightweight PHP templating tool that uses pure PHP syntax.
 No need to compile files into PHP.
+
+Supports
+
+  * Blocks
+  * Template inheritance
+  * Output Escaping (Block escaping)
+
 plink requires PHP version 5.3 because it uses namespaces.
 
 Setup
@@ -133,7 +140,7 @@ to end the block, the block will be escaped and outputted.
 &lt;script>alert('I am dangerous code!')&lt;/script>
 &lt;?php $this->endescape() ?>
 
-//same as above, more verbose
+//same as above, more verbose but with consistent endblock syntax.
 &lt;?php $this->block() ?>
 &lt;script>alert('I am dangerous code!')&lt;/script>
 &lt;?php $this->endblock(self::ESCAPE) ?>
@@ -164,5 +171,5 @@ echo h($dangerous);
 That's all!
 ====
 
-These are all the essential features, they are all you'll need to create great website!
+This is all you'll need to know to create great website!
 Not enough features for you?  Oh...  Well, there are other templating engines out there...
