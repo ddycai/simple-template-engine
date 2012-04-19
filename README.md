@@ -3,34 +3,38 @@ plink
 
 Super lightweight PHP templating tool that uses pure PHP syntax.
 No need to compile files into PHP.
+plink requires PHP version 5.3 because it uses namespaces.
 
 Setup
 =====
 
-Create an Environment, pass in your template directory
-and you're ready to render templates.  The Environment's render() function returns the template as a string:
+Include loader.php, create an Environment, pass in your template directory and you're ready to render templates.
+The Environment's render() function returns the template as a string:
 
 <pre class="brush: php">
-	//include the loader
-	require_once('path/to/plink/loader.php');
+//include the loader
+require_once('path/to/plink/loader.php');
 
-	use Dewdrop\Environment;
+use Dewdrop\Environment;
 
-	$dew = new Environment('path/to/templates');
-	echo $dew->render('index.php', array('pass'=>$template, 'variables'=>$here));
+$dew = new Environment('path/to/templates');
+echo $dew->render('index.php', array('pass'=>$template, 'variables'=>$here));
 </pre>
+
+*Important note:* the helpers.php file declares functions in the global namespace.
+Make sure to check that they don't conflict with your global functions!
 
 The Environment can hold variables shared by all your templates such as helpers.  Set variables like this: 
 <pre class="brush: php">
-	$dew->helper = new Helper();
-	$dew->favouriteColour = "green";
+$dew->helper = new Helper();
+$dew->favouriteColour = "green";
 </pre>
 
-Now, in your template, you can use your Puppy object and your favouriteColour.
+Now, in your template, you can use your Puppy object and your favouriteColour variable.
 
 <pre class="brush: php">
-	My favourite colour is &lt;?php echo $this->favouritecolour ?>.
-	&lt;?php echo $this->helper->link('Click here', 'rabbiy.html') ?> to see my pet rabbit!
+My favourite colour is &lt;?php echo $this->favouritecolour ?>.
+&lt;?php echo $this->helper->link('Click here', 'rabbiy.html') ?> to see my pet rabbit!
 </pre>
 
 Blocks
@@ -40,28 +44,28 @@ Blocks are sections of layout that you can define and then use later.
 Defining blocks for use in the layout clear and simple.
 Enclose your blocks in <code>$this->block('name here')</code> and <code>$this->endblock()</code>: 
 <pre class="brush: php">
-	&lt;?php $this->block('title') ?>
-	Welcome to my site!
-	&lt;?php $this->endblock() ?>
+&lt;?php $this->block('title') ?>
+Welcome to my site!
+&lt;?php $this->endblock() ?>
 
-	//this does the same thing
-	$this->block('title', 'Welcome to my site!'); //shortcut for small blocks
+//this does the same thing
+$this->block('title', 'Welcome to my site!'); //shortcut for small blocks
 </pre>
 
 You can access blocks by using $this as an array.  To output the block defined above: 
 
 <pre class="brush: php">
-	&lt;title>&lt;?=$this['title'] ?>&lt;/title>
+&lt;title>&lt;?=$this['title'] ?>&lt;/title>
 </pre>
 
 You can use if structures to set a default block to use if a block is not defined: 
 
 <pre class="brush: php">
-	&lt;title>
-	&lt;?php if(!$this['title']): ?>
-	No title :(
-	&lt;?php else: echo $this['title']; endif; ?>
-	&lt;/title>
+&lt;title>
+&lt;?php if(!$this['title']): ?>
+No title :(
+&lt;?php else: echo $this['title']; endif; ?>
+&lt;/title>
 </pre>
 
 Template Inheritance
@@ -72,8 +76,8 @@ then <em>extend</em> another one and use it there!
 Template inheritance is extremely powerful.  Extending a template is easy: 
 
 <pre class="brush: php">
-	&lt;?php $this->extend('layout.php'); ?>
-	This is my content.
+&lt;?php $this->extend('layout.php'); ?>
+This is my content.
 </pre>
 
 Let's make up some terms so you can understand the next paragraph.
@@ -88,12 +92,12 @@ content block in the child.  This new content block will be the content block of
 For example: 
 
 <pre class="brush: php">
-	//child.php
-	&lt;?php $this->extend('parent.php') ?>
-	Welcome to my site!
-	//in parent.php
-	echo $this['content'];
-	//will output 'Welcome to my site!'
+//child.php
+&lt;?php $this->extend('parent.php') ?>
+Welcome to my site!
+//in parent.php
+echo $this['content'];
+//will output 'Welcome to my site!'
 </pre>
 
 It is not a good idea to name a block <em>content</em>.
@@ -105,13 +109,13 @@ A block with no name will be outputted when you call <code>$this->endblock()</co
 That sounds pretty useless but it's not if you pass in a parameter to endblock.
 
 <pre class="brush: php">
-	&lt;?php $this->block() ?>
-	&lt;script>alert('I am dangerous code!')&lt;/script>
-	&lt;?php $this->endblock(self::ESCAPE) ?>
-	//this will do the same as above
-	&lt;?php $this->block() ?>
-	&lt;script>alert('I am dangerous code!')&lt;/script>
-	&lt;?php $this->endescape() ?>
+&lt;?php $this->block() ?>
+&lt;script>alert('I am dangerous code!')&lt;/script>
+&lt;?php $this->endblock(self::ESCAPE) ?>
+//this will do the same as above
+&lt;?php $this->block() ?>
+&lt;script>alert('I am dangerous code!')&lt;/script>
+&lt;?php $this->endescape() ?>
 </pre>
 
 This will output the block escaped.  If you try <code>endblock(self::ESCAPE)</code> with a named block,
@@ -123,14 +127,14 @@ Output Escaping
 You can escape blocks of output easily: 
 
 <pre class="brush: php">
-	echo $this['title']->escape();
-	echo $this['title']->e(); //shortcut
+echo $this['title']->escape();
+echo $this['title']->e(); //shortcut
 </pre>
 
 Escape variables with h(): 
 
 <pre class="brush: php">
-	echo h($dangerous);
+echo h($dangerous);
 </pre>
 
 Make sure you are not escaping output twice by <code>endblock(self::ESCAPE)</code> and then by <code>$this['block']->escape()</code>
