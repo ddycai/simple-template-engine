@@ -95,8 +95,10 @@ class Template implements \ArrayAccess
 			$b->append($content);
 		$block = array_pop($this->stack);
 		
-		if($type == self::ESCAPE)
+		if($type == self::ESCAPE) {
 			$block->setContent($block->escape());
+			$block->setEscaped(true);
+		}
 		
 		if(($name = $block->getName()) != null)
 			$this->blocks[$block->getName()] = $block;

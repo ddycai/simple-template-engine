@@ -16,10 +16,12 @@ class Block
 	
 	private $name;
 	private $content;
+	private $escaped;
 	
 	public function __construct($name = null) {
 		$this->name = $name;
 		$this->content = "";
+		$this->escaped = false;
 	}
 	
 	/**
@@ -72,10 +74,15 @@ class Block
 	
 	/**
 	 * Escapes the content and returns it.
+	 * If it's already escaped, it will simple return the content.
+	 * 
 	 * @return string
 	 */
 	public function escape() {
-		return htmlspecialchars($this->content, ENT_QUOTES, "UTF-8");
+		if(!$this->escaped)
+			return htmlspecialchars($this->content, ENT_QUOTES, "UTF-8");
+		else
+			return $this->content;
 	}
 	 
 	/**
@@ -105,6 +112,14 @@ class Block
 	 */
 	public function __toString() {
 		return $this->content;
+	}
+	
+	/**
+	 * Sets escaped
+	 * @param boolean $escaped 
+	 */
+	function setEscaped($escaped) {
+		$this->escaped = $escaped;
 	}
 
 }
