@@ -1,7 +1,7 @@
 plink
 =====
 
-Super lightweight PHP templating tool that uses pure PHP syntax.
+Lightweight PHP templating tool that uses pure PHP syntax.
 No need to compile files into PHP.
 
 Supports
