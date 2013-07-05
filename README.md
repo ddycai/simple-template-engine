@@ -1,8 +1,8 @@
 plink
 =====
 
-Lightweight PHP templating tool that uses pure PHP syntax.
-No need to compile files into PHP.
+plink is a simple PHP templating tool that uses pure PHP syntax.
+It is useful for small websites or in conjunction with microframeworks.
 
 Supports
 
@@ -10,7 +10,7 @@ Supports
   * Template inheritance
   * Output Escaping (Block escaping)
 
-plink requires PHP version 5.3 because it uses namespaces.
+plink requires PHP version 5.3+
 
 Setup
 -----
@@ -129,19 +129,20 @@ content block in the child.  This new content block will be the content block of
 Anonymous Blocks
 -----
 
-An anonymous block is one with no name (a block that starts with `$this->block()`) and will be outputted directly when you call `$this->endblock()`.
-**It's not useful to use `$this->endblock()` on a block with no name.**  However, if you call `$this->endescape()` instead
-to end the block, the block will be escaped and outputted.
+An anonymous block is one with no name (a block that starts with `$this->block()`) and will be outputted directly when you call `$this->endblock()`.  Thus, it's not useful to use `$this->endblock()` on an anonymous block!
+Ideally, we would use anonymous blocks to perform filters on code however I have not yet implemented this feature.
+Currently, we can use anonymous blocks to escape blocks of code.
+
 
 ```php
-&lt;?php $this->block() ?>
-&lt;script>alert('I am dangerous code!')&lt;/script>
-&lt;?php $this->endescape() ?>
+<?php $this->block() ?>
+<script>alert('I am dangerous code!');</script>
+<?php $this->endescape() ?>
 
 //same as above, more verbose but with consistent endblock syntax.
-&lt;?php $this->block() ?>
-&lt;script>alert('I am dangerous code!')&lt;/script>
-&lt;?php $this->endblock(self::ESCAPE) ?>
+<?php $this->block() ?>
+<script>alert('I am dangerous code!')&lt;/script>
+<?php $this->endblock(self::ESCAPE) ?>
 
 ```
 
@@ -150,7 +151,7 @@ be outputted but it will be permanently escaped.  This is useful for when you do
 unescaped version of the block at all.
 
 Output Escaping
-====
+-----
 You can escape blocks of output easily: 
 
 ```php
@@ -167,7 +168,6 @@ echo h($dangerous);
 ```
 
 That's all!
-====
+-----
 
-This is all you'll need to know to create great website!
-Not enough features for you?  Oh...  Well, there are other templating engines out there...
+Now you have everything you need to create a great website!
