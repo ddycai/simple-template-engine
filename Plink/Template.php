@@ -25,13 +25,33 @@ class Template implements \ArrayAccess
 	private $blocks;
 	private $extends;
 	
-	public function __construct($template, Environment $environment) {
+	/**
+	 * Constructs a template from a file path
+	 * If file path is null, constructs an empty popular
+	 * @param string $template the file path
+	 */
+	public function __construct($template = null) {
 		$this->template = $template;
-		$this->environment = $environment;
+		$this->environment = null;
 		$this->layout  = new Block();
 		$this->stack = array();
 		$this->blocks = array();
 		$this->extends = null;
+	}
+	
+	/**
+	 * Creates a template within an environment
+	 * @param Environment $environment
+	 * @param unknown $template
+	 * @return \Plink\Template
+	 */
+	public static function withEnvironment(Environment $environment, $path) {
+		$obj = new self($environment->getTemplatePath($path));
+		//don't extend yourself!
+		if($obj->template != $environment->getTemplatePath($environment->getLayout()))
+			$obj->extends = new Template($environment->getLayout());
+		$obj->environment = $environment;
+		return $obj;
 	}
 	
 	/**
@@ -45,8 +65,14 @@ class Template implements \ArrayAccess
 	 * 
 	 * @param type $template 
 	 */
-	public function extend($template) {
-		$this->extends = $template;
+	public function extend($path) {
+		if($this->environment !== null) {
+			if($this->template == $this->environment->getTemplatePath($path))
+				return;
+			$this->extends = Template::withEnvironment($this->environment, $path);
+		} else if($this->template != $path) {
+			$this->extends = new Template($path);
+		}
 	}
 	
 	/**
@@ -104,8 +130,6 @@ class Template implements \ArrayAccess
 			$this->blocks[$block->getName()] = $block;
 		else {
 			echo $block;
-			if($type == self::RAW)
-				echo "WARNING: a block with no name and no endblock parameter serves not purpose!";
 		}
 	}
 	
@@ -142,21 +166,23 @@ class Template implements \ArrayAccess
 	 * @return string 
 	 */
 	public function render(array $variables = array()) {
-		$_file = $this->environment->getTemplateDir() . DIRECTORY_SEPARATOR . $this->template . $this->environment->getExtension();
-		
-		if(!file_exists($_file))
-				throw new \InvalidArgumentException(sprintf("Could not render.  The file %s could not be found", $_file));
-		
-		extract($variables, EXTR_SKIP);
-		ob_start();
-		require($_file);
-		$this->layout->append(ob_get_clean());
+		if($this->template !== null) {
+			$_file = $this->template;
+			
+			if(!file_exists($_file))
+					throw new \InvalidArgumentException(sprintf("Could not render.  The file %s could not be found", $_file));
+			
+			extract($variables, EXTR_SKIP);
+			ob_start();
+			require($_file);
+			$this->layout->append(ob_get_clean());
+			
+		}
 		
 		//extending another template
 		if($this->extends !== null) {
-			$extended = new Template($this->extends, $this->environment);
-			$extended->setBlocks($this->getBlocks());
-			$content = (string)$extended->render();
+			$this->extends->setBlocks($this->getBlocks());
+			$content = (string)$this->extends->render();
 			return $content;
 		}
 		

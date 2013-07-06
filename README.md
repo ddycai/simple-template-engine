@@ -26,9 +26,6 @@ $plink = new Plink\Environment('path/to/templates/directory');
 echo $plink->render('template.php', array('pass'=>$variables, 'variable name'=>$value));
 ```
 
-**Important note:** the helpers.php file loaded by loader.php declares functions in the global namespace.
-Make sure to check that they don't conflict with your global functions!
-
 You can also pass in extensions that will be appended to ALL renders by an Environment.
 
 ```php
@@ -87,8 +84,8 @@ Default Title
 Template Inheritance
 -----
 
-Why are blocks useful?  Blocks are useful because we can define blocks in one template, 
-then _extend_ another one and use it there!
+Why are blocks useful?  Blocks are useful because we can define blocks in one template, then _extend_ another one and use it there!
+This allows us to reuse a template such as a layout multiple times with different blocks.
 Template inheritance is extremely powerful and extending a template is easy: 
 
 ```php
@@ -104,7 +101,7 @@ This is my title block.
 This is my content.
 ```
 
-When you extend a parent template, any non-block code in the child will become a special block named content in the parent. *
+When you extend a parent template, any non-block code in the child will become a special block named content in the parent.
 In the above code, we defined a title block and some content.  Now we can use it in our extended layout.
 In layout.php, we can output our content and title with `$this['content']` and `$this['title']`.
 
@@ -120,11 +117,36 @@ In layout.php, we can output our content and title with `$this['content']` and `
 </html>
 ```
 
-* Thus, please be careful not to name a block _content_ unless you are intentionally defining a content block.
+Please be careful not to name a block _content_ unless you are intentionally defining a content block.
 If you define a content block, it will be prepended to the non-block content in the layout.
 
-**Advanced:** If the parent template is extending another template (let's call that the grandparent), then any non-block content in the parent will be appended to the
-content block in the child.  This new content block will be the content block of the grandparent.
+**Extending a template extending a template**: If the parent template is extending another template (let's call that the grandparent), then any non-block content in the parent will be appended to the content block in the child.  This new content block will be the content block of the grandparent.
+
+Layouts
+-----
+
+You can set the environment to have a layout so that every template it creates extends that layout.
+
+```php
+$plink = new Plink\Environment('path/to/templates');
+$plink->setLayout('layout.php');
+echo $plink->render('view.php');
+```
+
+Every template that the environment renders will extend the `layout.php`.
+
+Templates can also be defined within PHP without having to render from file.
+You can create a new template object through the `template()` function of Environment.
+
+```php
+$plink->setLayout('layout.php');
+$template = $plink->template();
+$template['content'] = "hello";
+echo $template->render();
+```
+
+Remember that the Template object must have a layout otherwise nothing will be rendered.
+In the code above, we set the layout through the Environment object.
 
 Anonymous Blocks
 -----
@@ -161,10 +183,35 @@ echo $this['title']->e(); //shortcut
 
 This will have no effect on blocks that are escaped already by `$this->endescape()`.
 
-Escape non-block output with h(): 
+Template class
+-----
+
+Although I don't recommend it, you can also create a Template object without the Environment by passing the path to your template.
+Template objects can be manipulated exactly like `$this` in a template file (because they are the same type of object!)
 
 ```php
-echo h($dangerous);
+$template = new \Plink\Template('path/to/template.php');
+$template->extend('layout.php');
+echo $template->render();
+```
+
+However, note that if you're not using an Environment, you must specify the full path to the template files every time:
+
+```php
+$template = new \Plink\Template('path/to/template.php');
+$template->extend('path/to/layout.php');
+echo $template->render();
+```
+Even if you're within a template file!
+
+```php
+//index.php
+//no environment
+$template = new \Plink\Template('path/to/template.php')->render();
+
+//template.php
+<?php $this->extend('path/from/index.php/to/layout.php'); ?>
+...
 ```
 
 That's all!

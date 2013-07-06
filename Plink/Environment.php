@@ -21,6 +21,7 @@ namespace Plink;
 class Environment
 {
 	private $templateDir;
+	private $layout;
 	private $extension;
 	private $templates;
 	private $variables;
@@ -32,6 +33,7 @@ class Environment
 	public function __construct($templateDir, $extension = '') {
 		$this->templateDir = $templateDir;
 		$this->extension = $extension;
+		$this->layout = null;
 		$this->variables = array();
 	}
 	
@@ -44,9 +46,42 @@ class Environment
 	public function render($template, array $variables = array()) {
 		//add to a list of template objects
 		if(!isset($this->templates[$template]))
-			$this->templates[$template] = new Template($template, $this);
+			$this->templates[$template] = Template::withEnvironment($this, $template);
 		
 		return $this->templates[$template]->render($variables);
+	}
+	
+	/**
+	 * Creates an empty template in this environment
+	 */
+	public function template() {
+		return Template::withEnvironment($this, null);
+	}
+	
+	/**
+	 * Gets the path of the template in this environment
+	 * @param unknown $template
+	 * @return string
+	 */
+	public function getTemplatePath($template) {
+		return $this->getTemplateDir() . DIRECTORY_SEPARATOR . $template . $this->getExtension();
+	}
+	
+	/**
+	 * Sets a layout for the environment so that every template created by the environment extends the layout
+	 * unless overridden.
+	 * @param string $layout
+	 */
+	public function setLayout($layout) {
+		$this->layout = $layout;
+	}
+	
+	/**
+	 * Layout getter
+	 * @return layout path
+	 */
+	public function getLayout() {
+		return $this->layout;
 	}
 	
 	/**
@@ -94,14 +129,6 @@ class Environment
 	 */
 	public function getTemplateDir() {
 		return $this->templateDir;
-	}
-
-	/**
-	 * Set the template directory
-	 * @param string $templateDir 
-	 */
-	public function setTemplateDir($templateDir) {
-		$this->templateDir = $templateDir;
 	}
 	
 	/**

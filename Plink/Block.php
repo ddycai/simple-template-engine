@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author Duncan Cai 
+ * @author Duncan Cai
  */
 
 namespace Plink;
