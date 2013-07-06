@@ -133,7 +133,7 @@ $plink->setLayout('layout.php');
 echo $plink->render('view.php');
 ```
 
-Every template that the environment renders will extend the `layout.php`.
+Every template that the environment renders will extend `layout.php`.
 
 Templates can also be defined within PHP without having to render from file.
 You can create a new template object through the `template()` function of Environment.
