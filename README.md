@@ -26,7 +26,7 @@ $plink = new Plink\Environment('path/to/templates/directory');
 echo $plink->render('template.php');
 ```
 
-You can also pass in an extension that will be appended to all renders by an Environment.
+You can also pass in an extension that will be appended to all template paths in Environment.
 
 ```php
 $plink = new \Plink\Environment('path/to/templates', '.php');
