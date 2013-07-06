@@ -9,48 +9,40 @@ namespace Plink;
 /**
  * Template class
  * 
- * Represents a template file.
- * Blocks in the template can be accessed by using this object as an array. 
+ * Blocks in the template can be accessed by using this object as an array.
+ * Allows access to shared environment variables as class variables with magic get and set.
  */
 class Template implements \ArrayAccess
 {
 	
-	const RAW = 0;
-	const ESCAPE = 1;
-	
-	private $template;
-	private $environment;
-	private $layout;
-	private $stack;
-	private $blocks;
-	private $extends;
+	protected $templatePath;
+	protected $environment;
+	protected $content;
+	private $stack = array();
+	protected $blocks = array();
+	protected $extends = null;
 	
 	/**
 	 * Constructs a template from a file path
-	 * If file path is null, constructs an empty popular
-	 * @param string $template the file path
+	 * If file path is null, constructs an empty template
+	 * @param string $path the file path
 	 */
-	public function __construct($template = null) {
-		$this->template = $template;
+	public function __construct($path = null) {
+		$this->templatePath = $path;
 		$this->environment = null;
-		$this->layout  = new Block();
-		$this->stack = array();
-		$this->blocks = array();
-		$this->extends = null;
+		$this->content = new Block();
 	}
 	
 	/**
 	 * Creates a template within an environment
 	 * @param Environment $environment
-	 * @param unknown $template
+	 * @param unknown $path
 	 * @return \Plink\Template
 	 */
 	public static function withEnvironment(Environment $environment, $path) {
 		$obj = new self($environment->getTemplatePath($path));
-		//don't extend yourself!
-		if($obj->template != $environment->getTemplatePath($environment->getLayout()))
-			$obj->extends = new Template($environment->getLayout());
-		$obj->environment = $environment;
+		$obj->setEnvironment($environment);
+		$obj->extend($environment->getLayout());
 		return $obj;
 	}
 	
@@ -63,21 +55,26 @@ class Template implements \ArrayAccess
 	 * then the output of the extending template will become the content
 	 * block of the extended template.
 	 * 
-	 * @param type $template 
+	 * @param string $path
 	 */
 	public function extend($path) {
-		if($this->environment !== null) {
-			if($this->template == $this->environment->getTemplatePath($path))
+		if($path === null) {
+			return;
+		} else if($this->environment !== null) {
+			if($this->templatePath == $this->environment->getTemplatePath($path))
 				return;
 			$this->extends = Template::withEnvironment($this->environment, $path);
-		} else if($this->template != $path) {
+		} else if($this->templatePath != $path) {
 			$this->extends = new Template($path);
 		}
 	}
 	
 	/**
 	 * Indicates the start of a block.
-	 * @param string $name 
+	 * If a value for the block is defined, it does not need to be closed with endblock
+	 * @param string $name name of the block
+	 * @param string $value optional value for the block
+	 * @throws \LogicException
 	 */
 	public function block($name = null, $value = null) {
 		
@@ -103,41 +100,25 @@ class Template implements \ArrayAccess
 	}
 	
 	/**
-	 * Indicates the end of a block.
-	 * 
+	 * Indicates the end of a block, and optionally accepts a filter to apply to the content.
 	 * Returns the block as a string.
-	 * Passing ESCAPE can be passed to escape this block.
-	 * 
-	 * If the block has no name, it will be outputted.
-	 * A block with no name and the default $type is pointless and will output
-	 * a warning.
-	 * 
-	 * @param int $type
+	 * @param \Closure $filter function to apply to block contents
+	 * @return Block object
 	 */
-	public function endblock($type = self::RAW) {
+	public function endblock(\Closure $filter = null) {
 		$content = ob_get_clean();
 		//nested blocks
 		foreach($this->stack as &$b)
 			$b->append($content);
 		$block = array_pop($this->stack);
 		
-		if($type == self::ESCAPE) {
-			$block->setContent($block->escape());
-			$block->setEscaped(true);
+		if($filter !== null) {
+			$block->setContent($filter($block->getContent()));
 		}
 		
 		if(($name = $block->getName()) != null)
 			$this->blocks[$block->getName()] = $block;
-		else {
-			echo $block;
-		}
-	}
-	
-	/**
-	 * Shorthand function for endblock with an ESCAPE parameter. 
-	 */
-	public function endescape() {
-		$this->endblock(self::ESCAPE);
+		return $block;
 	}
 	
 	/**
@@ -146,9 +127,9 @@ class Template implements \ArrayAccess
 	 */
 	public function getBlocks() {
 		if(!$this['content'])
-			$this['content'] = $this->layout;
+			$this['content'] = $this->content;
 		else
-			$this['content'] = $this['content'] . $this->layout;
+			$this['content'] = $this['content'] . $this->content;
 		return $this->blocks;
 	}
 
@@ -162,12 +143,12 @@ class Template implements \ArrayAccess
 	
 	/**
 	 * Renders a template and returns it as a string.
-	 * @param string $template
+	 * @param string $templatePath
 	 * @return string 
 	 */
 	public function render(array $variables = array()) {
-		if($this->template !== null) {
-			$_file = $this->template;
+		if($this->templatePath !== null) {
+			$_file = $this->templatePath;
 			
 			if(!file_exists($_file))
 					throw new \InvalidArgumentException(sprintf("Could not render.  The file %s could not be found", $_file));
@@ -175,7 +156,7 @@ class Template implements \ArrayAccess
 			extract($variables, EXTR_SKIP);
 			ob_start();
 			require($_file);
-			$this->layout->append(ob_get_clean());
+			$this->content->append(ob_get_clean());
 			
 		}
 		
@@ -186,8 +167,16 @@ class Template implements \ArrayAccess
 			return $content;
 		}
 		
-		return (string)$this->layout;
+		return (string)$this->content;
 		
+	}
+	
+	/**
+	 * Sets template environment
+	 * @param Environment $environment
+	 */
+	public function setEnvironment(Environment $environment) {
+		$this->environment = $environment;
 	}
 	
 	/**

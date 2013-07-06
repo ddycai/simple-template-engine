@@ -4,4 +4,5 @@ require_once 'loader.php';
 
 $plink = new Plink\Environment('examples');
 $plink->setLayout('layout.php');
-echo $plink->render('home.php');
+echo $plink->render('home.php', array('date'=>date('l jS \of F Y')));
+?>

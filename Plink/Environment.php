@@ -10,12 +10,11 @@ namespace Plink;
  * Environment class
  * 
  * This is a factory class that creates Template objects.
- * Each Environment is associated with a template directory where
- * all templates will be loaded.  This simplifies template loading.
+ * Each Environment is associated with a directed of template files
+ * from which the templates are loaded.
  * 
  * The environment also holds shared variables amongst all Templates.
- * The variables can be accessed from any Template class created by
- * this Environment.
+ * The variables can be accessed from any Template class created by this Environment.
  * This is useful for holding helpers such as routers, form helpers etc.
  */
 class Environment
@@ -23,7 +22,6 @@ class Environment
 	private $templateDir;
 	private $layout;
 	private $extension;
-	private $templates;
 	private $variables;
 	
 	/**
@@ -43,12 +41,9 @@ class Environment
 	 * @return string
 	 * @throws \InvalidArgumentException 
 	 */
-	public function render($template, array $variables = array()) {
-		//add to a list of template objects
-		if(!isset($this->templates[$template]))
-			$this->templates[$template] = Template::withEnvironment($this, $template);
-		
-		return $this->templates[$template]->render($variables);
+	public function render($path, array $variables = array()) {
+		$template = Template::withEnvironment($this, $path);
+		return $template->render($variables);
 	}
 	
 	/**
@@ -109,18 +104,6 @@ class Environment
 	 */
 	public function __set($id, $value) {
 		$this->variables[$id] = $value;
-	}
-	
-	/**
-	 * Get a template
-	 * @param string $name the filename
-	 * @return boolean|Template
-	 */
-	public function getTemplate($name) {
-		if(isset($this->templates[$name]))
-			return $this->templates[$name];
-		else
-			return false;
 	}
 	
 	/**

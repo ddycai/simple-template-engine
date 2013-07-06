@@ -14,9 +14,9 @@ namespace Plink;
 class Block
 {
 	
-	private $name;
-	private $content;
-	private $escaped;
+	protected $name;
+	protected $content;
+	protected $escaped;
 	
 	public function __construct($name = null) {
 		$this->name = $name;
