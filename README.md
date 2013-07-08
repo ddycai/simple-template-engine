@@ -1,21 +1,17 @@
 plink
 =====
 
-plink is a simple PHP templating tool that uses pure PHP syntax.
-It is easy to learn and is useful for small websites or in conjunction with microframeworks.
+A simple and lightweight PHP templating engine using pure PHP syntax.
+plink adds on to PHP's templating capabilities by introducing blocks and template inheritance.
 
-Features
-
-  * Blocks
-  * Template inheritance
-  * Output escaping/Block filters
+It's easy to learn and is useful for small websites or in conjunction with microframeworks.
 
 plink requires PHP version 5.3+
 
 Setup
 -----
 
-Using plink is simple: include `loader.php`, create an `Environment` object, and render away!
+To use plink, include `loader.php`, create an `Environment` object, and render away!
 The Environment's `render()` function takes the path to a template, renders it and returns its contents as a string.
 
 ```php
@@ -52,15 +48,15 @@ My favourite fruit is <?php echo $fruit ?>.
 The Environment can hold variables shared by all your templates such as helpers.  Set variables like this: 
 ```php
 $plink->helper = new Helper();
-$plink->favouriteColour = "green";
+$plink->colour = "green";
 ```
 
-Now, in your template, you can use your Helper object and your favouriteColour variable.
+Now, in your template, you can use your `Helper` object and your `colour` variable.
 
 ```php
 //inside template.php
-My favourite colour is <?php echo $this->favouriteColour ?>.
-<?php echo $this->helper->link('Click here', 'rabbit.html') ?> to see my pet rabbit!
+My favourite colour is <?php echo $this->colour ?>.
+<?php echo $this->helper->doSomething() ?>
 ```
 
 Blocks
@@ -73,15 +69,14 @@ You can define blocks by enclosing text in `$this->block('name here')` and `$thi
 <?php $this->block('title') ?>
 Welcome to my site!
 <?php $this->endblock() ?>
-
-//this does the same thing
+<?php
 $this->block('title', 'Welcome to my site!'); //shortcut for small blocks
 ```
 This will create a Block object that you can access later through `$this` by using their name.
 For example, to output the block defined above: 
 
 ```php
-<title><?=$this['title'] ?></title>
+<title><?php echo $this['title'] ?></title>
 ```
 
 You can also use `if` structures to set a default block to use if a block is not defined: 
@@ -118,7 +113,7 @@ If you don't assign a name to your block, it cannot be accessed later.
 Filters
 -----
 
-You can also pass a closure to `endblock` that you want to apply to the content.
+You can pass a closure to `endblock` that you want to apply to the content.
 
 ```php
 <?php $this->block() ?>
@@ -129,7 +124,7 @@ Hello, this is a block of text.
 ?>
 ```
 
-The above code converts an entire block's text to uppercase.
+The above code converts a block's content to uppercase.
 
 Template Inheritance
 -----
@@ -139,15 +134,13 @@ This allows us to reuse a template such as a layout multiple times with differen
 Extending a template is done using the `extend` function:
 
 ```php
-//extend a template
 <?php $this->extend('layout.php'); ?>
 
-//define a block
-<?php $this->block('title') ?>
-This is my title block.
+<?php $this->block('title', 'My Awesome Page') ?>
+<?php $this->block('scripts') ?>
+<script src="jquery.js"></script>
 <?php $this->endblock() ?>
 
-//insert some content
 This is my content.
 ```
 
@@ -156,10 +149,11 @@ In the above code, we defined a title block and some content.  Now we can use it
 In layout.php, we can output our content and title with `$this['content']` and `$this['title']`.
 
 ```php
-//my layout
+<!-- my layout -->
 <html>
 	<head>
 		<title><?=$this['title'] ?></title>
+		<?=$this['scripts'] ?>
 	</head>
 	<body>
 		<?=$this['content'] ?>
@@ -170,12 +164,13 @@ In layout.php, we can output our content and title with `$this['content']` and `
 Please be careful not to name a block _content_ unless you are intentionally defining a content block.
 If you define a content block, it will be prepended to the non-block content in the layout.
 
-**Extending a template extending a template**: If the parent template is extending another template (let's call that the grandparent), then any non-block content in the parent will be appended to the content block in the child.  This new content block will be the content block of the grandparent.
+**A template that extends a template that extends a template**: If the parent template is extending another template, then any non-block content in the parent will be appended to the content block of their child.  This new content block will become the content block of the grandparent.
 
 Layouts
 -----
 
 You can set the Environment to have a layout so that every template it creates extends that layout.
+This is useful if your site has the same layout throughout.
 
 ```php
 $plink = new Plink\Environment('path/to/templates');
@@ -183,7 +178,7 @@ $plink->setLayout('layout.php');
 echo $plink->render('template.php');
 ```
 
-Every template that the environment renders will extend `layout.php`.
+Every template that the environment renders will extend `layout.php` unless you override it in your template.
 
 Templates can also be created without having to render from file and their blocks can be defined within PHP.
 You can create a new template object through the `template()` function of Environment.
