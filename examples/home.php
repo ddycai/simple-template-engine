@@ -1,4 +1,4 @@
-<?php $this->extend('layout.php') ?>
+<?php $this->extend('layout') ?>
 <?php $this->block('title', 'My Site Title') ?>
 <h1>plink</h1>
 
@@ -13,4 +13,4 @@
 ?></p>
 
 <h3>Learn more</h3>
-<p>Refer to the README file or visit plink's github page</p>
+<p>Refer to the README file or visit <a href="http://frigidrain.github.io/plink">plink's page</a>.</p>

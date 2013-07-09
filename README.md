@@ -166,32 +166,20 @@ If you define a content block, it will be prepended to the non-block content in 
 
 **A template that extends a template that extends a template**: If the parent template is extending another template, then any non-block content in the parent will be appended to the content block of their child.  This new content block will become the content block of the grandparent.
 
-Layouts
+Templates
 -----
-
-You can set the Environment to have a layout so that every template it creates extends that layout.
-This is useful if your site has the same layout throughout.
-
-```php
-$plink = new Plink\Environment('path/to/templates');
-$plink->setLayout('layout.php');
-echo $plink->render('template.php');
-```
-
-Every template that the environment renders will extend `layout.php` unless you override it in your template.
 
 Templates can also be created without having to render from file and their blocks can be defined within PHP.
 You can create a new template object through the `template()` function of Environment.
 
 ```php
-$plink->setLayout('layout.php');
 $template = $plink->template();
+$template->extend('layout.php');
 $template['content'] = "hello";
 echo $template->render();
 ```
 
 Remember that a Template object created this way must have a layout otherwise nothing will be rendered.
-In the code above, we set the layout through the Environment object.
 
 That's all!
 -----

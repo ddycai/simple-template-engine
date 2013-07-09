@@ -40,9 +40,11 @@ class Template implements \ArrayAccess
 	 * @return \Plink\Template
 	 */
 	public static function withEnvironment(Environment $environment, $path) {
-		$obj = new self($environment->getTemplatePath($path));
+		if($path === null)
+			$obj = new self(null);
+		else
+			$obj = new self($environment->getTemplatePath($path));
 		$obj->setEnvironment($environment);
-		$obj->extend($environment->getLayout());
 		return $obj;
 	}
 	
