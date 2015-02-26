@@ -4,7 +4,7 @@
  * @author Duncan Cai 
  */
 
-namespace Plink;
+namespace SimpleTemplateEngine;
 
 /**
  * Template class

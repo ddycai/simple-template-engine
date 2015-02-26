@@ -1,6 +1,6 @@
 <?php
 //include the loader
-require_once 'loader.php';
+require_once 'SimpleTemplateEngine/loader.php';
 
-$plink = new Plink\Environment('examples', '.php');
-echo $plink->render('home', array('date'=>date('l jS \of F Y')));
+$env = new SimpleTemplateEngine\Environment('examples', '.php');
+echo $env->render('home', ['date'=>date('l jS \of F Y')]);

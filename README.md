@@ -1,41 +1,41 @@
-plink
+Simple Template Engine
 =====
 
 A simple and lightweight PHP templating engine using pure PHP syntax.
-plink adds on to PHP's templating capabilities by introducing blocks and template inheritance.
+Simple Template Engine adds on to PHP's templating capabilities by introducing blocks and template inheritance.
 
 It's easy to learn and is useful for small websites or in conjunction with microframeworks.
 
-plink requires PHP version 5.3+
+Requires PHP version 5.3+
 
 Setup
 -----
 
-To use plink, include `loader.php`, create an `Environment` object, and render away!
+To use the template engine, include `loader.php`, create an `Environment` object, and render away!
 The Environment's `render()` function takes the path to a template, renders it and returns its contents as a string.
 
 ```php
 //include the loader
 require_once 'path/to/loader.php';
 
-$plink = new Plink\Environment('path/to/templates/directory');
-echo $plink->render('template.php');
+$env = new SimpleTemplateEngine\Environment('path/to/templates/directory');
+echo $env->render('template.php');
 ```
 
 You can also pass in an extension that will be appended to all template paths in Environment.
 
 ```php
-$plink = new \Plink\Environment('path/to/templates', '.php');
+$env = new SimpleTemplateEngine\Environment('path/to/templates', '.php');
 
 //will render index.php
-echo $plink->render('index');
+echo $env->render('index');
 ```
 
 You can pass variables to your template via an array:
 
 ```php
 //index.php
-echo $plink->render('template.php', array('name'=>$value, 'fruit'=>'banana'));
+echo $env->render('template.php', ['name'=>$value, 'fruit'=>'banana']);
 ```
 
 You can then access the variable `$fruit` in your template, and its value will be apple.
@@ -47,8 +47,8 @@ My favourite fruit is <?php echo $fruit ?>.
 
 The Environment can hold variables shared by all your templates such as helpers.  Set variables like this: 
 ```php
-$plink->helper = new Helper();
-$plink->colour = "green";
+$env->helper = new Helper();
+$env->colour = "green";
 ```
 
 Now, in your template, you can use your `Helper` object and your `colour` variable.
@@ -95,6 +95,8 @@ You can escape blocks of output easily:
 
 ```php
 echo $this['title']->escape();
+// OR this shorthand notation
+echo $this['title']->e();
 ```
 
 The function `endblock` returns a Block object that you can output.
@@ -173,7 +175,7 @@ Templates can also be created without having to render from file and their block
 You can create a new template object through the `template()` function of Environment.
 
 ```php
-$template = $plink->template();
+$template = $env->template();
 $template->extend('layout.php');
 $template['content'] = "hello";
 echo $template->render();
